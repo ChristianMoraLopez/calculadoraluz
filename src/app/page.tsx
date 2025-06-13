@@ -91,33 +91,41 @@ export default function CalculadoraLuz() {
   }, [totalLuz, aseo, consumoMes, totalInquilinos, inquilinos]);
 
   const generarMensajeWhatsApp = () => {
-    const costoKwh = parseFloat(totalLuz) / parseFloat(consumoMes);
-    const cantidadTotalInquilinos = totalInquilinos ? parseInt(totalInquilinos) : inquilinos.length;
-    
-    let mensaje = `🏢 *DIVISIÓN DE LUZ - EDIFICIO PAOLA T.*\n\n`;
-    mensaje += `💡 *Datos Generales:*\n`;
-    mensaje += `• Total de luz: $${formatearPeso(parseFloat(totalLuz))}\n`;
-    mensaje += `• Costo aseo: $${formatearPeso(parseFloat(aseo))}\n`;
-    mensaje += `• Consumo total: ${consumoMes} kWh\n`;
-    mensaje += `• Costo por kWh: $${isNaN(costoKwh) ? '0' : formatearDecimal(costoKwh)}\n`;
-    mensaje += `• Total inquilinos edificio: ${cantidadTotalInquilinos}\n`;
-    mensaje += `• Inquilinos calculados: ${inquilinos.length}\n\n`;
+  const costoKwh = parseFloat(totalLuz) / parseFloat(consumoMes);
+  const cantidadTotalInquilinos = totalInquilinos ? parseInt(totalInquilinos) : inquilinos.length;
 
-    mensaje += `📊 *Detalle por Inquilino:*\n`;
-    resultados.forEach((resultado, index) => {
-      mensaje += `\n${index + 1}. *${resultado.nombre}*\n`;
-      mensaje += `   • Consumo: ${formatearDecimal(resultado.consumoKwh)} kWh\n`;
-      mensaje += `   • Pago luz: $${formatearPeso(resultado.pagoLuz)}\n`;
-      mensaje += `   • Aseo: $${formatearPeso(resultado.costoAseo)}\n`;
-      mensaje += `   • *Total: $${formatearPeso(resultado.pagoTotal)}*\n`;
-    });
+  let mensaje = `🏢 *DIVISIÓN DE LUZ - EDIFICIO PAOLA T.*\n\n`;
+  mensaje += `💡 *Datos Generales:*\n`;
+  mensaje += `• Total de luz: $${formatearPeso(parseFloat(totalLuz))}\n`;
+  mensaje += `• Costo aseo: $${formatearPeso(parseFloat(aseo))}\n`;
+  mensaje += `• Consumo total: ${consumoMes} kWh\n`;
+  mensaje += `• Costo por kWh: $${isNaN(costoKwh) ? '0' : formatearDecimal(costoKwh)}\n`;
+  mensaje += `• Total inquilinos edificio: ${cantidadTotalInquilinos}\n`;
+  mensaje += `• Inquilinos calculados: ${inquilinos.length}\n\n`;
 
-    const totalCalculado = resultados.reduce((sum, r) => sum + r.pagoTotal, 0);
-    mensaje += `\n💰 *TOTAL CALCULADO: $${formatearPeso(totalCalculado)}*`;
+  mensaje += `📊 *Detalle por Inquilino:*\n`;
+  resultados.forEach((resultado, index) => {
+    mensaje += `\n${index + 1}. *${resultado.nombre}*\n`;
+    mensaje += `   • Consumo: ${formatearDecimal(resultado.consumoKwh)} kWh\n`;
+    mensaje += `   • Pago luz: $${formatearPeso(resultado.pagoLuz)}\n`;
+    mensaje += `   • Aseo: $${formatearPeso(resultado.costoAseo)}\n`;
+    mensaje += `   • *Total: $${formatearPeso(resultado.pagoTotal)}*\n`;
+  });
 
-    const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-  };
+  const totalCalculado = resultados.reduce((sum, r) => sum + r.pagoTotal, 0);
+  mensaje += `\n💰 *TOTAL CALCULADO: $${formatearPeso(totalCalculado)}*`;
+
+  // Encode the message properly for WhatsApp
+  const encodedMessage = encodeURIComponent(mensaje).replace(/%20/g, '+');
+
+  // Use api.whatsapp.com for better mobile compatibility
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const baseUrl = isMobile ? 'https://api.whatsapp.com/send' : 'https://web.whatsapp.com/send';
+  const url = `${baseUrl}?text=${encodedMessage}`;
+
+  // Open in a new tab/window
+  window.open(url, '_blank');
+};
 
   const totalCalculado = resultados.reduce((sum, r) => sum + r.pagoTotal, 0);
   const costoKwh = totalLuz && consumoMes ? parseFloat(totalLuz) / parseFloat(consumoMes) : 0;
